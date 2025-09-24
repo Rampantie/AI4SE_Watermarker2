@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QSlider, QLineEdit, QComboBox
+    QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QSlider, QLineEdit, QComboBox, QMessageBox
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
@@ -77,30 +77,41 @@ class MainWindow(QMainWindow):
 
     def export_images(self):
         folder = QFileDialog.getExistingDirectory(self, "选择导出文件夹")
-        if folder:
-            output_format = self.format_selector.currentText().lower()  # 获取用户选择的输出格式
-            quality = self.quality_slider.value()  # 获取 JPEG 压缩质量
-            prefix = self.prefix_input.text()  # 获取自定义前缀
-            suffix = self.suffix_input.text()  # 获取自定义后缀
+        if not folder:
+            return  # 用户取消选择
 
-            for index in range(self.image_list.count()):
-                item = self.image_list.item(index)
-                input_path = item.toolTip()  # 获取图片的完整路径
-                base_name, _ = os.path.splitext(os.path.basename(input_path))
-                
-                # 判断前缀是否为空，若非空则添加下划线
-                output_name = f"{prefix + '_' if prefix else ''}{base_name}{suffix}.{output_format}"
-                output_path = os.path.join(folder, output_name)
+        # 检查是否与原文件夹相同
+        for index in range(self.image_list.count()):
+            item = self.image_list.item(index)
+            input_path = item.toolTip()  # 获取图片的完整路径
+            input_dir = os.path.dirname(input_path)
+            if os.path.abspath(folder) == os.path.abspath(input_dir):
+                QMessageBox.warning(self, "警告", "禁止导出到原文件夹，请选择其他文件夹。")
+                return  # 终止导出操作
 
-                # 使用 PIL 保存图片
-                with Image.open(input_path) as img:
-                    if output_format == "jpeg":
-                        img = img.convert("RGB")  # 确保 JPEG 格式不包含透明通道
-                        img.save(output_path, format="JPEG", quality=quality)
-                    elif output_format == "png":
-                        img.save(output_path, format="PNG")
+        output_format = self.format_selector.currentText().lower()  # 获取用户选择的输出格式
+        quality = self.quality_slider.value()  # 获取 JPEG 压缩质量
+        prefix = self.prefix_input.text()  # 获取自定义前缀
+        suffix = self.suffix_input.text()  # 获取自定义后缀
 
-                print(f"已导出: {output_path}")  # 调试输出
+        for index in range(self.image_list.count()):
+            item = self.image_list.item(index)
+            input_path = item.toolTip()  # 获取图片的完整路径
+            base_name, _ = os.path.splitext(os.path.basename(input_path))
+            
+            # 判断前缀是否为空，若非空则添加下划线
+            output_name = f"{prefix + '_' if prefix else ''}{base_name}{suffix}.{output_format}"
+            output_path = os.path.join(folder, output_name)
+
+            # 使用 PIL 保存图片
+            with Image.open(input_path) as img:
+                if output_format == "jpeg":
+                    img = img.convert("RGB")  # 确保 JPEG 格式不包含透明通道
+                    img.save(output_path, format="JPEG", quality=quality)
+                elif output_format == "png":
+                    img.save(output_path, format="PNG")
+
+            print(f"已导出: {output_path}")  # 调试输出
 
 class ImageListWidget(QListWidget):
     def __init__(self, parent=None):
