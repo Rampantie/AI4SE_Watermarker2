@@ -142,7 +142,7 @@ pip install PyQt5 Pillow
 使用 PyInstaller 将程序打包为 Windows 可执行文件：
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --noconsole -i icon.ico main.py
+pyinstaller --noconsole main.py
 ```
 打包完成后，生成的可执行文件位于 `dist` 文件夹中。
 
