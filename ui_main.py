@@ -33,16 +33,16 @@ class MainWindow(QMainWindow):
 
         # 输出选项
         self.prefix_input = QLineEdit()
-        self.prefix_input.setPlaceholderText("自定义前缀")
+        self.prefix_input.setPlaceholderText("自定义导出图片名前缀")
         self.suffix_input = QLineEdit()
-        self.suffix_input.setPlaceholderText("自定义后缀")
+        self.suffix_input.setPlaceholderText("自定义导出图片名后缀")
         self.quality_slider = QSlider(Qt.Horizontal)
         self.quality_slider.setRange(0, 100)
         self.quality_slider.setValue(80)
 
         self.format_selector = QComboBox()  # 添加输出格式选择器
         self.format_selector.addItems(["JPEG", "PNG"])  # 添加选项
-        layout.addWidget(QLabel("输出格式"))
+        layout.addWidget(QLabel("导出图片格式"))
         layout.addWidget(self.format_selector)
 
         layout.addWidget(QLabel("JPEG 压缩质量"))
