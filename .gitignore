@@ -1,0 +1,5 @@
+# 忽略 images_test 文件夹
+images_test/
+
+# 忽略 __pycache__ 文件夹
+__pycache__/
