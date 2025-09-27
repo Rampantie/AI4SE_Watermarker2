@@ -156,5 +156,3 @@ pyinstaller --noconsole main.py
 - 如果需要忽略某些文件夹（如 `images_test` 或 `__pycache__`），请在 `.gitignore` 文件中添加相应规则。
 - 如果遇到网络问题导致无法推送到 GitHub，请检查代理设置或使用 SSH 连接。
 
-## 许可证
-本项目遵循 MIT 许可证。
