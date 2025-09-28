@@ -69,24 +69,57 @@ class MainWindow(QMainWindow):
         # 分割线
         self.add_separator(layout)
 
-        # 输出选项
-        layout.addWidget(QLabel("导出图片格式"))
+        # ======= 导出设置（含尺寸设置） =======
+        export_settings_layout = QVBoxLayout()
+        export_settings_layout.setSpacing(8)
+
+        # 导出尺寸设置（移到导出设置顶部）
+        size_layout = QHBoxLayout()
+        size_layout.addWidget(QLabel("导出尺寸："))
+        self.size_mode_combo = QComboBox()
+        self.size_mode_combo.addItems(["原图", "指定宽度", "指定高度", "按百分比缩放"])
+        self.size_mode_combo.currentIndexChanged.connect(self.update_size_mode)
+        size_layout.addWidget(self.size_mode_combo)
+        self.width_input = QSpinBox()
+        self.width_input.setRange(1, 10000)
+        self.width_input.setValue(800)
+        self.width_input.setPrefix("宽度:")
+        self.height_input = QSpinBox()
+        self.height_input.setRange(1, 10000)
+        self.height_input.setValue(600)
+        self.height_input.setPrefix("高度:")
+        self.percent_input = QSpinBox()
+        self.percent_input.setRange(1, 1000)
+        self.percent_input.setValue(100)
+        self.percent_input.setSuffix("%")
+        size_layout.addWidget(self.width_input)
+        size_layout.addWidget(self.height_input)
+        size_layout.addWidget(self.percent_input)
+        size_layout.addStretch()
+        export_settings_layout.addLayout(size_layout)
+        self.update_size_mode()  # 初始化禁用状态
+
+        # 导出格式与质量
+        export_settings_layout.addWidget(QLabel("导出图片格式"))
         self.format_selector = QComboBox()
         self.format_selector.addItems(["JPEG", "PNG"])
-        layout.addWidget(self.format_selector)
+        export_settings_layout.addWidget(self.format_selector)
 
-        layout.addWidget(QLabel("JPEG 压缩质量"))
+        export_settings_layout.addWidget(QLabel("JPEG 压缩质量"))
         self.quality_slider = QSlider(Qt.Horizontal)
         self.quality_slider.setRange(0, 100)
         self.quality_slider.setValue(80)
-        layout.addWidget(self.quality_slider)
+        export_settings_layout.addWidget(self.quality_slider)
 
         self.prefix_input = QLineEdit()
         self.prefix_input.setPlaceholderText("自定义导出图片名前缀")
         self.suffix_input = QLineEdit()
         self.suffix_input.setPlaceholderText("自定义导出图片名后缀")
-        layout.addWidget(self.prefix_input)
-        layout.addWidget(self.suffix_input)
+        export_settings_layout.addWidget(self.prefix_input)
+        export_settings_layout.addWidget(self.suffix_input)
+
+        layout.addLayout(export_settings_layout)
+        # ======= 导出设置结束 =======
 
         # 分割线
         self.add_separator(layout)
@@ -177,16 +210,33 @@ class MainWindow(QMainWindow):
         imgwm_layout.addStretch()
         layout.addLayout(imgwm_layout)
 
-        scale_layout = QHBoxLayout()
+        # 图片水印缩放方式选择
+        imgwm_size_layout = QHBoxLayout()
+        imgwm_size_layout.addWidget(QLabel("图片水印缩放方式："))
+        self.imgwm_size_mode_combo = QComboBox()
+        self.imgwm_size_mode_combo.addItems(["按比例缩放", "指定宽度", "指定高度"])
+        self.imgwm_size_mode_combo.currentIndexChanged.connect(self.update_imgwm_size_mode)
+        imgwm_size_layout.addWidget(self.imgwm_size_mode_combo)
         self.imgwm_scale_slider = QSlider(Qt.Horizontal)
         self.imgwm_scale_slider.setRange(5, 100)
         self.imgwm_scale_slider.setValue(self.image_watermark_scale)
         self.imgwm_scale_slider.valueChanged.connect(self.update_imgwm_scale_label)
         self.imgwm_scale_label = QLabel(f"缩放: {self.image_watermark_scale}%")
-        scale_layout.addWidget(self.imgwm_scale_label)
-        scale_layout.addWidget(self.imgwm_scale_slider)
-        scale_layout.addStretch()
-        layout.addLayout(scale_layout)
+        self.imgwm_width_input = QSpinBox()
+        self.imgwm_width_input.setRange(1, 10000)
+        self.imgwm_width_input.setValue(200)
+        self.imgwm_width_input.setPrefix("宽度:")
+        self.imgwm_height_input = QSpinBox()
+        self.imgwm_height_input.setRange(1, 10000)
+        self.imgwm_height_input.setValue(100)
+        self.imgwm_height_input.setPrefix("高度:")
+        imgwm_size_layout.addWidget(self.imgwm_scale_label)
+        imgwm_size_layout.addWidget(self.imgwm_scale_slider)
+        imgwm_size_layout.addWidget(self.imgwm_width_input)
+        imgwm_size_layout.addWidget(self.imgwm_height_input)
+        imgwm_size_layout.addStretch()
+        layout.addLayout(imgwm_size_layout)
+        self.update_imgwm_size_mode()  # 初始化禁用状态
 
         img_opacity_layout = QHBoxLayout()
         self.imgwm_opacity_slider = QSlider(Qt.Horizontal)
@@ -255,6 +305,19 @@ class MainWindow(QMainWindow):
         self.image_watermark_opacity = val
         self.imgwm_opacity_label.setText(f"图片水印透明度: {val}%")
 
+    def update_size_mode(self):
+        mode = self.size_mode_combo.currentIndex()
+        self.width_input.setEnabled(mode == 1)
+        self.height_input.setEnabled(mode == 2)
+        self.percent_input.setEnabled(mode == 3)
+
+    def update_imgwm_size_mode(self):
+        mode = self.imgwm_size_mode_combo.currentIndex()
+        self.imgwm_scale_slider.setEnabled(mode == 0)
+        self.imgwm_scale_label.setEnabled(mode == 0)
+        self.imgwm_width_input.setEnabled(mode == 1)
+        self.imgwm_height_input.setEnabled(mode == 2)
+
     def export_images(self):
         folder = QFileDialog.getExistingDirectory(self, "选择导出文件夹")
         if not folder:
@@ -284,6 +347,9 @@ class MainWindow(QMainWindow):
         imgwm_path = self.image_watermark_path
         imgwm_scale = self.imgwm_scale_slider.value()
         imgwm_opacity = self.imgwm_opacity_slider.value()
+        imgwm_size_mode = self.imgwm_size_mode_combo.currentIndex()
+        imgwm_width = self.imgwm_width_input.value()
+        imgwm_height = self.imgwm_height_input.value()
         # 组合风格后缀
         style = ""
         if is_bold and is_italic:
@@ -307,6 +373,11 @@ class MainWindow(QMainWindow):
             else:
                 # 任意一个
                 font_path = list(self.font_files[font_base].values())[0]
+        # 获取导出尺寸设置（修正：放到循环外，避免NameError）
+        size_mode = self.size_mode_combo.currentIndex()
+        width = self.width_input.value()
+        height = self.height_input.value()
+        percent = self.percent_input.value()
         for index in range(self.image_list.count()):
             item = self.image_list.item(index)
             input_path = item.toolTip()  # 获取图片的完整路径
@@ -317,6 +388,23 @@ class MainWindow(QMainWindow):
             output_path = os.path.join(folder, output_name)
 
             with Image.open(input_path) as img:
+                # ----------- 新增尺寸调整 -----------
+                orig_w, orig_h = img.size
+                if size_mode == 1:  # 指定宽度
+                    new_w = width
+                    new_h = int(orig_h * (width / orig_w))
+                    img = img.resize((new_w, new_h), resample=resample_method)
+                elif size_mode == 2:  # 指定高度
+                    new_h = height
+                    new_w = int(orig_w * (height / orig_h))
+                    img = img.resize((new_w, new_h), resample=resample_method)
+                elif size_mode == 3:  # 百分比缩放
+                    scale = percent / 100.0
+                    new_w = int(orig_w * scale)
+                    new_h = int(orig_h * scale)
+                    img = img.resize((new_w, new_h), resample=resample_method)
+                # ----------- 尺寸调整结束 -----------
+
                 # 文本水印处理
                 if watermark_text:
                     if img.mode != "RGBA":
@@ -367,9 +455,18 @@ class MainWindow(QMainWindow):
                         with Image.open(imgwm_path) as wm_img:
                             wm_img = wm_img.convert("RGBA")
                             # 缩放
-                            scale = imgwm_scale / 100.0
-                            new_w = int(img.size[0] * scale)
-                            new_h = int(wm_img.size[1] * (new_w / wm_img.size[0]))
+                            if imgwm_size_mode == 0:  # 按比例
+                                scale = imgwm_scale / 100.0
+                                new_w = int(img.size[0] * scale)
+                                new_h = int(wm_img.size[1] * (new_w / wm_img.size[0]))
+                            elif imgwm_size_mode == 1:  # 指定宽度
+                                new_w = imgwm_width
+                                new_h = int(wm_img.size[1] * (new_w / wm_img.size[0]))
+                            elif imgwm_size_mode == 2:  # 指定高度
+                                new_h = imgwm_height
+                                new_w = int(wm_img.size[0] * (new_h / wm_img.size[1]))
+                            else:
+                                new_w, new_h = wm_img.size
                             wm_img = wm_img.resize((new_w, new_h), resample=resample_method)
                             # 透明度
                             if imgwm_opacity < 100:
@@ -378,7 +475,6 @@ class MainWindow(QMainWindow):
                             # 粘贴到右下角
                             x = img.size[0] - wm_img.size[0] - 20
                             y = img.size[1] - wm_img.size[1] - 20
-                            # 合成
                             img.alpha_composite(wm_img, (x, y))
                     except Exception as e:
                         print(f"图片水印处理失败: {e}")
