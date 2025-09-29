@@ -584,7 +584,7 @@ class MainWindow(QMainWindow):
 
     def on_image_selected(self, index):
         self.current_preview_index = index
-        self.custom_pos = None
+        # 删除重置 custom_pos 的逻辑，保留拖拽后的水印位置
         self.update_preview()
 
     def update_preview(self):
@@ -720,10 +720,9 @@ class MainWindow(QMainWindow):
     def get_watermark_pos(self, img_size, wm_size):
         # 九宫格/自定义坐标
         if self.custom_pos:
-            x, y = self.custom_pos
-            # 保证不超界
-            x = max(0, min(img_size[0] - wm_size[0], x))
-            y = max(0, min(img_size[1] - wm_size[1], y))
+            x_percent, y_percent = self.custom_pos
+            x = int(x_percent * img_size[0])
+            y = int(y_percent * img_size[1])
             return x, y
         mode = self.watermark_pos_mode
         W, H = img_size
@@ -923,7 +922,7 @@ class PreviewLabel(QLabel):
             # 限制不超界
             new_x = max(0, min(pixmap_size.width() - self.get_wm_size()[0], new_x))
             new_y = max(0, min(pixmap_size.height() - self.get_wm_size()[1], new_y))
-            self.mainwin.custom_pos = (new_x, new_y)
+            self.mainwin.custom_pos = (new_x / pixmap_size.width(), new_y / pixmap_size.height())  # 转换为百分比
             self.mainwin.watermark_pos_mode = "custom"
             self.mainwin.update_pos_buttons()
             self.mainwin.update_preview()
@@ -1027,5 +1026,6 @@ class PreviewLabel(QLabel):
             except Exception:
                 text_width, text_height = 100, 40
             return (text_width, text_height)
+        return (60, 40)  # 默认
         return (60, 40)  # 默认
         return (60, 40)  # 默认
