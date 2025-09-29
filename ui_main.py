@@ -20,7 +20,21 @@ def resource_path(relative_path):
     return os.path.join(os.path.abspath("."), relative_path)
 
 FONTS_DIR = resource_path("fonts")
-TEMPLATES_FILE = resource_path("templates.json")
+
+def get_user_data_path():
+    """获取用户本地数据目录"""
+    if sys.platform == "win32":
+        return os.path.join(os.getenv("APPDATA"), "PhotoWatermarker")
+    else:
+        return os.path.join(os.path.expanduser("~"), ".PhotoWatermarker")
+
+USER_DATA_DIR = get_user_data_path()
+TEMPLATES_FILE = os.path.join(USER_DATA_DIR, "templates.json")
+DEFAULT_TEMPLATES_FILE = resource_path("templates.json")
+
+# 确保用户数据目录存在
+if not os.path.exists(USER_DATA_DIR):
+    os.makedirs(USER_DATA_DIR)
 
 def get_fonts_in_folder(folder):
     fonts = []
@@ -825,6 +839,9 @@ class MainWindow(QMainWindow):
     def load_templates(self):
         if os.path.exists(TEMPLATES_FILE):
             with open(TEMPLATES_FILE, "r", encoding="utf-8") as f:
+                templates = json.load(f)
+        elif os.path.exists(DEFAULT_TEMPLATES_FILE):
+            with open(DEFAULT_TEMPLATES_FILE, "r", encoding="utf-8") as f:
                 templates = json.load(f)
         else:
             templates = {}
