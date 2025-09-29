@@ -114,7 +114,7 @@ pip install PyQt5 Pillow
    ├── ui_main.py      # 用户界面逻辑文件
    ├── image_processor.py # 图片处理逻辑文件
    ├── README.md       # 项目说明文档
-   ├── templates.json  # 水印模板配置文件
+   ├── templates.json  # 默认水印模板配置文件
    ```
 2. 运行以下命令启动程序：
    ```bash
@@ -125,7 +125,7 @@ pip install PyQt5 Pillow
 使用 PyInstaller 将程序打包为 Windows 可执行文件，并确保 `fonts` 文件夹被正确包含：
 ```bash
 pip install pyinstaller
-pyinstaller --noconsole --add-data "fonts;fonts" main.py
+pyinstaller --onefile --noconsole --add-data "fonts;fonts" --add-data "templates.json;." main.py
 ```
 
 ### 参数说明
