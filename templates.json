@@ -1,0 +1,22 @@
+{
+    "default": {
+        "watermark_text": "Add Watermark",
+        "font": "Arial",
+        "font_size": 100,
+        "bold": true,
+        "italic": false,
+        "color": [
+            255,
+            255,
+            255
+        ],
+        "opacity": 80,
+        "shadow": true,
+        "outline": true,
+        "image_watermark_path": null,
+        "image_watermark_scale": 30,
+        "image_watermark_opacity": 80,
+        "position_mode": "right_bottom",
+        "custom_pos": null
+    }
+}
