@@ -6,14 +6,21 @@ from PyQt5.QtGui import QPixmap, QIcon, QColor, QImage, QPainter
 from PIL import Image, ImageDraw, ImageFont  # 添加 ImageDraw, ImageFont
 import os
 import json
+import sys
 
 try:
     resample_method = Image.Resampling.LANCZOS
 except AttributeError:
     resample_method = Image.LANCZOS
 
-FONTS_DIR = os.path.join(os.path.dirname(__file__), "fonts")
-TEMPLATES_FILE = os.path.join(os.path.dirname(__file__), "templates.json")
+def resource_path(relative_path):
+    """获取资源文件的绝对路径，兼容 PyInstaller 打包后的环境"""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+FONTS_DIR = resource_path("fonts")
+TEMPLATES_FILE = resource_path("templates.json")
 
 def get_fonts_in_folder(folder):
     fonts = []
